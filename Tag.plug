@@ -1,0 +1,9 @@
+[Core]
+Name = Tag
+Module = Tag
+
+[Python]
+Version = 2+
+
+[Documentation]
+Description = Simple sqlite based Tag storage
