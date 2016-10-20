@@ -79,7 +79,7 @@ class Tag(BotPlugin):
     @botcmd(admin_only=True,)
     def tag(self, msg, args):
         """Adds a new tag, usage: !tag <tag> -> <message> """
-        if len(args) < 2:
+        if "->" not in args:
             return "Usage: !tag <tag> -> <data>"
         author = msg.frm.nick
         sep = args.index('->')
