@@ -55,10 +55,10 @@ class Tag(BotPlugin):
             return 'Tag: %s Message: %s' % (tag[1], tag[2])
 
     @botcmd(split_args_with=None)
-    def tag(self, msg, args):
-        """Fetches a tag, usage: !tag <tag>"""
+    def get(self, msg, args):
+        """Fetches a tag, usage: !get <tag>"""
         if len(args) != 1:
-            return 'Usage: !tag get <id>'
+            return 'Usage: !get <tag>'
         self.cur.execute('select message from tags where tag like "' + args[0] + '";')
         message = self.cur.fetchone()
         if message is None:
@@ -76,14 +76,15 @@ class Tag(BotPlugin):
         for row in rows:
             yield 'Tag: %s -> %s' % (row[1], row[2])
 
-    @botcmd(admin_only=True, split_args_with=None)
-    def tag_add(self, msg, args):
-        """Adds a new tag, usage: !tag add <tag> <message> """
+    @botcmd(admin_only=True,)
+    def tag(self, msg, args):
+        """Adds a new tag, usage: !tag <tag> -> <message> """
         if len(args) < 2:
-            return "Usage: !tag add <tag> <data>"
+            return "Usage: !tag <tag> -> <data>"
         author = msg.frm.nick
-        tag = args[0]
-        message = " ".join(args[0 + 1:])
+        sep = args.index('->')
+        tag = ''.join(args[:sep - 1])
+        message = ''.join(args[sep + 2:])
         self.cur.execute('select * from tags where tag like "' + tag + '";')
         hit = self.cur.fetchone()
         if hit is None:
@@ -95,9 +96,9 @@ class Tag(BotPlugin):
 
     @botcmd(admin_only=True)
     def tag_del(self, msg, args):
-        """Removes tag from database, usage: !tag del <id>"""
+        """Removes tag from database, usage: !tag del <tag>"""
         if args == '':
-            return "Usage: !tag del <id>"
+            return "Usage: !tag del <tag>"
         self.cur.execute('delete from tags where tag like  "' + args + '";')
         self.con.commit()
         return 'Removed tag: %s.' % args
