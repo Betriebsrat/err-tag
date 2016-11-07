@@ -42,29 +42,36 @@ class Tag(BotPlugin):
 
     @botcmd()
     def tag_find(self, msg, args):
-        """Searches the tags and their messages for given keyword, usage: !tag find <args>"""
-        if args == '':
-            return "Usage: !tag find <args>"
+        """Fetches a tag, usage: !get <tag>"""
+        if len(args) == '':
+            return 'Usage: !get <tag>'
 
-        self.cur.execute('select * from tags where message like ? or tag like ? order by random() limit 1;',
-                         ('%' + args + '%', '%' + args + '%',))
-        tag = self.cur.fetchone()
-        if tag is None:
-            return 'Found no matches for: %s.' % (args)
+        self.cur.execute('select * from tags where tag like "%' + args + '%" limit 3;')
+        tags = self.cur.fetchall()
+
+        if tags is None:
+            return 'No matches with tag \'%s\'.' % args
         else:
-            return 'Tag: %s Message: %s' % (tag[1], tag[2])
+            message = '\n'.join(["Tag: {} Text:{}".format(tag[1], tag[2]) for tag in tags])
+            return '%s \nSearch was limited to 3 results max.' % message
 
-    @botcmd(split_args_with=None)
+    @botcmd()
     def get(self, msg, args):
         """Fetches a tag, usage: !get <tag>"""
-        if len(args) != 1:
+        if len(args) == '':
             return 'Usage: !get <tag>'
-        self.cur.execute('select message from tags where tag like "' + args[0] + '";')
-        message = self.cur.fetchone()
-        if message is None:
-            return 'No matches with tag \'%s\'.' % args[0]
+
+        self.cur.execute('select message from tags where tag like "' + args + '";')
+        tag = self.cur.fetchone()
+        if tag is None:
+            self.cur.execute('select * from tags where message like ? or tag like ? limit 1;',
+                             ('%' + args + '%', '%' + args + '%',))
+            tag = self.cur.fetchone()
+
+        if tag is None:
+            return 'No matches with tag \'%s\'.' % args
         else:
-            return '%s' % (message[0])
+            return '%s' % (tag[2])
 
     @botcmd()
     def tag_new(self, msg, args):
