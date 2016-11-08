@@ -64,14 +64,14 @@ class Tag(BotPlugin):
         self.cur.execute('select message from tags where tag like "' + args + '";')
         tag = self.cur.fetchone()
         if tag is None:
-            self.cur.execute('select * from tags where message like ? or tag like ? limit 1;',
+            self.cur.execute('select message from tags where message like ? or tag like ? limit 1;',
                              ('%' + args + '%', '%' + args + '%',))
             tag = self.cur.fetchone()
 
         if tag is None:
             return 'No matches with tag \'%s\'.' % args
         else:
-            return '%s' % (tag[2])
+            return '%s' % (tag[0])
 
     @botcmd()
     def tag_new(self, msg, args):
