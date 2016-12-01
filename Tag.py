@@ -18,7 +18,12 @@ class Tag(BotPlugin):
             self.con = sqlite3.connect(TAG_DB, check_same_thread=False)
             self.cur = self.con.cursor()
             self.cur.execute(
-                'create table if not exists tags (id integer primary key, tag text not null, message text not null, author text default \'unknown\', date text default CURRENT_DATE) ;')
+                "create table if not exists tags (\
+                id integer primary key, \
+                tag text not null, \
+                message text not null, \
+                author text default \'unknown\', \
+                date text default CURRENT_DATE)")
             self.con.commit()
         except sqlite3.Error as e:
             print(e)
@@ -33,7 +38,7 @@ class Tag(BotPlugin):
         """ Returns further details about a tag, usage !tag details <tag>"""
         if len(args) > 1:
             return 'Usage = !tag details <tag>'
-        self.cur.execute('select * from tags where tag like "' + args[0] + '";')
+        self.cur.execute('select * from tags where tag like ?', (args[0],))
         tag = self.cur.fetchone()
         if tag is not None:
             return 'Tag: %s Message: %s, Author: %s Date: %s' % (tag[1], tag[2], tag[3], tag[4])
@@ -46,7 +51,7 @@ class Tag(BotPlugin):
         if len(args) == '':
             return 'Usage: !get <tag>'
 
-        self.cur.execute('select * from tags where tag like "%' + args + '%" limit 3;')
+        self.cur.execute("select * from tags where tag like ? limit 3", ('%' + args + '%',))
         tags = self.cur.fetchall()
 
         if tags is None:
@@ -61,10 +66,10 @@ class Tag(BotPlugin):
         if len(args) == '':
             return 'Usage: !get <tag>'
 
-        self.cur.execute('select message from tags where tag like "' + args + '";')
+        self.cur.execute("select message from tags where tag like ?", ('%' + args + '%',))
         tag = self.cur.fetchone()
         if tag is None:
-            self.cur.execute('select message from tags where message like ? or tag like ? limit 1;',
+            self.cur.execute('select message from tags where message like ? or tag like ? limit 1',
                              ('%' + args + '%', '%' + args + '%',))
             tag = self.cur.fetchone()
 
@@ -78,12 +83,12 @@ class Tag(BotPlugin):
         """Returns the latest 3 tags, usage !tag new"""
         if args != '':
             return 'Usage !tag new'
-        self.cur.execute('select * from tags order by id desc limit 3;')
+        self.cur.execute('select * from tags order by id desc limit 5')
         rows = self.cur.fetchall()
         for row in rows:
             yield 'Tag: %s -> %s' % (row[1], row[2])
 
-    @botcmd(admin_only=True,)
+    @botcmd(admin_only=True, )
     def tag(self, msg, args):
         """Adds a new tag, usage: !tag <tag> -> <message> """
         if "->" not in args:
@@ -92,10 +97,10 @@ class Tag(BotPlugin):
         sep = args.index('->')
         tag = ''.join(args[:sep - 1])
         message = ''.join(args[sep + 2:])
-        self.cur.execute('select * from tags where tag like "' + tag + '";')
+        self.cur.execute("select * from tags where tag like ?", (tag,))
         hit = self.cur.fetchone()
         if hit is None:
-            self.cur.execute('insert into tags (tag, message, author) values (?,?,?);', (tag, message, author))
+            self.cur.execute('insert into tags (tag, message, author) values (?,?,?)', (tag, message, author))
             self.con.commit()
             return 'Added message for tag: %s.' % tag
         else:
@@ -106,6 +111,11 @@ class Tag(BotPlugin):
         """Removes tag from database, usage: !tag del <tag>"""
         if args == '':
             return "Usage: !tag del <tag>"
-        self.cur.execute('delete from tags where tag like  "' + args + '";')
-        self.con.commit()
+        self.cur.execute("select * from tags where tag = ?", (args,))
+        hit = self.cur.fetchone()
+
+        if hit is not None:
+            self.cur.execute("delete from tags where tag = ?", (args,))
+            self.con.commit()
+
         return 'Removed tag: %s.' % args
