@@ -38,8 +38,10 @@ class Tag(BotPlugin):
         """ Returns further details about a tag, usage !tag details <tag>"""
         if len(args) > 1:
             return 'Usage = !tag details <tag>'
-        self.cur.execute('select * from tags where tag like ?', (args[0],))
+
+        self.cur.execute('select * from tags where tag = ?', (args[0],))
         tag = self.cur.fetchone()
+
         if tag is not None:
             return 'Tag: %s Message: %s, Author: %s Date: %s' % (tag[1], tag[2], tag[3], tag[4])
         else:
@@ -57,8 +59,8 @@ class Tag(BotPlugin):
         if tags is None:
             return 'No matches with tag \'%s\'.' % args
         else:
-            message = '\n'.join(["Tag: {} Text:{}".format(tag[1], tag[2]) for tag in tags])
-            return '%s \nSearch was limited to 3 results max.' % message
+            message = '\n'.join(["Tag: {} Message:{}".format(tag[1], tag[2]) for tag in tags])
+            return '%s \n' % message
 
     @botcmd()
     def get(self, msg, args):
@@ -68,6 +70,7 @@ class Tag(BotPlugin):
 
         self.cur.execute("select message from tags where tag like ?", ('%' + args + '%',))
         tag = self.cur.fetchone()
+
         if tag is None:
             self.cur.execute('select message from tags where message like ? or tag like ? limit 1',
                              ('%' + args + '%', '%' + args + '%',))
@@ -83,8 +86,10 @@ class Tag(BotPlugin):
         """Returns the latest 3 tags, usage !tag new"""
         if args != '':
             return 'Usage !tag new'
+
         self.cur.execute('select * from tags order by id desc limit 5')
         rows = self.cur.fetchall()
+
         for row in rows:
             yield 'Tag: %s -> %s' % (row[1], row[2])
 
@@ -93,12 +98,14 @@ class Tag(BotPlugin):
         """Adds a new tag, usage: !tag <tag> -> <message> """
         if "->" not in args:
             return "Usage: !tag <tag> -> <data>"
+
         author = msg.frm.nick
         sep = args.index('->')
         tag = ''.join(args[:sep - 1])
         message = ''.join(args[sep + 2:])
-        self.cur.execute("select * from tags where tag like ?", (tag,))
+        self.cur.execute("select tag from tags where tag = ?", (tag,))
         hit = self.cur.fetchone()
+
         if hit is None:
             self.cur.execute('insert into tags (tag, message, author) values (?,?,?)', (tag, message, author))
             self.con.commit()
@@ -111,11 +118,11 @@ class Tag(BotPlugin):
         """Removes tag from database, usage: !tag del <tag>"""
         if args == '':
             return "Usage: !tag del <tag>"
-        self.cur.execute("select * from tags where tag = ?", (args,))
+
+        self.cur.execute("select tag from tags where tag = ?", (args,))
         hit = self.cur.fetchone()
 
         if hit is not None:
             self.cur.execute("delete from tags where tag = ?", (args,))
             self.con.commit()
-
         return 'Removed tag: %s.' % args
