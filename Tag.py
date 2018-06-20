@@ -53,13 +53,15 @@ class Tag(BotPlugin):
         if len(args) == '':
             return 'Usage: !get <tag>'
 
-        self.cur.execute("select * from tags where tag like ? limit 3", ('%' + args + '%',))
+        self.cur.execute(
+            "select * from tags where tag like ? limit 3", ('%' + args + '%',))
         tags = self.cur.fetchall()
 
         if tags is None:
             return 'No matches with tag \'%s\'.' % args
         else:
-            message = '\n'.join(["Tag: {} Message:{}".format(tag[1], tag[2]) for tag in tags])
+            message = '\n'.join(
+                ["Tag: {} Message:{}".format(tag[1], tag[2]) for tag in tags])
             return '%s \n' % message
 
     @botcmd()
@@ -68,7 +70,8 @@ class Tag(BotPlugin):
         if len(args) == '':
             return 'Usage: !get <tag>'
 
-        self.cur.execute("select message from tags where tag like ?", ('%' + args + '%',))
+        self.cur.execute(
+            "select message from tags where tag like ?", ('%' + args + '%',))
         tag = self.cur.fetchone()
 
         if tag is None:
@@ -90,8 +93,9 @@ class Tag(BotPlugin):
         self.cur.execute('select * from tags order by id desc limit 5')
         rows = self.cur.fetchall()
 
-        for row in rows:
-            yield 'Tag: %s -> %s' % (row[1], row[2])
+        if rows:
+            for row in rows:
+                yield 'Tag: %s -> %s' % (row[1], row[2])
 
     @botcmd(admin_only=True, )
     def tag(self, msg, args):
@@ -107,7 +111,8 @@ class Tag(BotPlugin):
         hit = self.cur.fetchone()
 
         if hit is None:
-            self.cur.execute('insert into tags (tag, message, author) values (?,?,?)', (tag, message, author))
+            self.cur.execute(
+                'insert into tags (tag, message, author) values (?,?,?)', (tag, message, author))
             self.con.commit()
             return 'Added message for tag: %s.' % tag
         else:
@@ -126,3 +131,18 @@ class Tag(BotPlugin):
             self.cur.execute("delete from tags where tag = ?", (args,))
             self.con.commit()
         return 'Removed tag: %s.' % args
+
+    @botcmd(admin_only=True)
+    def tag_list(self, msg, args):
+        """Gets all tags from database, usage !tag list"""
+        if args != '':
+            return 'Usage: !tag list'
+
+        self.cur.execute("select tag from tags")
+        rows = self.cur.fetchall()
+
+        if rows:
+            msg = " ".join(row[0] for row in rows)
+            return "List of tags: \n{}".format(msg)
+        else:
+            return "no tags found"
