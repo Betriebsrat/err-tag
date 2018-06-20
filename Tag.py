@@ -142,7 +142,7 @@ class Tag(BotPlugin):
         rows = self.cur.fetchall()
 
         if rows:
-            msg = " ".join(row[0] for row in rows)
+            msg = ", ".join(row[0] for row in rows)
             return "List of tags: \n{}".format(msg)
         else:
             return "no tags found"
