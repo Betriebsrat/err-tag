@@ -54,7 +54,7 @@ class Tag(BotPlugin):
             return 'Usage: !get <tag>'
 
         self.cur.execute(
-            "select * from tags where tag like ? limit 3", ('%' + args + '%',))
+            'select * from tags where tag like ? limit 3', ('%' + args + '%',))
         tags = self.cur.fetchall()
 
         if tags is None:
@@ -71,7 +71,7 @@ class Tag(BotPlugin):
             return 'Usage: !get <tag>'
 
         self.cur.execute(
-            "select message from tags where tag like ?", ('%' + args + '%',))
+            'select message from tags where tag like ?', ('%' + args + '%',))
         tag = self.cur.fetchone()
 
         if tag is None:
@@ -107,7 +107,7 @@ class Tag(BotPlugin):
         sep = args.index('->')
         tag = ''.join(args[:sep - 1])
         message = ''.join(args[sep + 2:])
-        self.cur.execute("select tag from tags where tag = ?", (tag,))
+        self.cur.execute('select tag from tags where tag = ?', (tag,))
         hit = self.cur.fetchone()
 
         if hit is None:
@@ -124,11 +124,11 @@ class Tag(BotPlugin):
         if args == '':
             return "Usage: !tag del <tag>"
 
-        self.cur.execute("select tag from tags where tag = ?", (args,))
+        self.cur.execute('select tag from tags where tag = ?', (args,))
         hit = self.cur.fetchone()
 
         if hit is not None:
-            self.cur.execute("delete from tags where tag = ?", (args,))
+            self.cur.execute('delete from tags where tag = ?', (args,))
             self.con.commit()
         return 'Removed tag: %s.' % args
 
@@ -138,7 +138,7 @@ class Tag(BotPlugin):
         if args != '':
             return 'Usage: !tag list'
 
-        self.cur.execute("select tag from tags")
+        self.cur.execute('select tag from tags')
         rows = self.cur.fetchall()
 
         if rows:
