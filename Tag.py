@@ -92,10 +92,11 @@ class Tag(BotPlugin):
 
         self.cur.execute('select * from tags order by id desc limit 5')
         rows = self.cur.fetchall()
-
         if rows:
+            answer = ''
             for row in rows:
-                yield 'Tag: %s -> %s' % (row[1], row[2])
+                answer += 'Tag: %s -> %s' % (row[1], row[2])
+            return answer
 
     @botcmd(admin_only=True, )
     def tag(self, msg, args):
