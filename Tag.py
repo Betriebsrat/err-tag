@@ -98,7 +98,7 @@ class Tag(BotPlugin):
                 answer += 'Tag: %s -> %s' % (row[1], row[2])
             return answer
 
-    @botcmd(admin_only=True, )
+    @botcmd(admin_only=False)
     def tag(self, msg, args):
         """Adds a new tag, usage: !tag <tag> -> <message> """
         if "->" not in args:
@@ -119,7 +119,7 @@ class Tag(BotPlugin):
         else:
             return 'Tag %s already exists.' % tag
 
-    @botcmd(admin_only=True)
+    @botcmd(admin_only=False)
     def tag_del(self, msg, args):
         """Removes tag from database, usage: !tag del <tag>"""
         if args == '':
@@ -133,7 +133,7 @@ class Tag(BotPlugin):
             self.con.commit()
         return 'Removed tag: %s.' % args
 
-    @botcmd(admin_only=True)
+    @botcmd(admin_only=False)
     def tag_list(self, msg, args):
         """Gets all tags from database, usage !tag list"""
         if args != '':
