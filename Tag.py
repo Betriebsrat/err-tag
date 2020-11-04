@@ -111,6 +111,9 @@ class Tag(BotPlugin):
         self.cur.execute('select tag from tags where tag = ?', (tag,))
         hit = self.cur.fetchone()
 
+        if message == '':
+            return "Empty Tag, doing nothing."
+
         if hit is None:
             self.cur.execute(
                 'insert into tags (tag, message, author) values (?,?,?)', (tag, message, author))
