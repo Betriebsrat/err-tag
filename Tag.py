@@ -2,6 +2,7 @@ import logging
 import os
 import sqlite3
 from errbot import botcmd, BotPlugin
+import random
 
 
 class Tag(BotPlugin):
@@ -32,6 +33,12 @@ class Tag(BotPlugin):
     def deactivate(self):
         self.con.close()
         super(Tag, self).deactivate()
+
+    @staticmethod
+    def respond_random():
+        responders = ['Sure.', 'Alright.',
+                      'No problem.', 'Will do.', 'Okay.', 'Logen.']
+        return random.choice(responders)
 
     @botcmd(split_args_with=None)
     def tag_details(self, msg, args):
@@ -118,7 +125,7 @@ class Tag(BotPlugin):
             self.cur.execute(
                 'insert into tags (tag, message, author) values (?,?,?)', (tag, message, author))
             self.con.commit()
-            return 'Added message for tag: %s.' % tag
+            return self.respond_random()
         else:
             return 'Tag %s already exists.' % tag
 
@@ -134,7 +141,7 @@ class Tag(BotPlugin):
         if hit is not None:
             self.cur.execute('delete from tags where tag = ?', (args,))
             self.con.commit()
-        return 'Removed tag: %s.' % args
+        return self.respond_random()
 
     @botcmd(admin_only=False)
     def tag_list(self, msg, args):
